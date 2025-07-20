@@ -1,3 +1,11 @@
+
+from sema4ai.actions import action, Response, ActionError
+import os
+from .image_generation import YoDawgImageGenerator
+from .models import YoDawgResponse
+from typing import Optional
+
+
 from robocorp import browser
 from sema4ai.actions import action, Response, ActionError
 import os
@@ -9,20 +17,78 @@ from typing import Optional
 
 dotenv.load_dotenv()
 
+
 LINKEDIN_USERNAME = os.getenv("LINKEDIN_USERNAME")
 LINKEDIN_PASSWORD = os.getenv("LINKEDIN_PASSWORD")
 
 
 
+# ─────────────────────────────────────────
+# New action: Overlay Yo Dawg quote on a static image
+# ─────────────────────────────────────────
+
+
+def _overlay_yo_dawg_quote_on_static_image(
+    yo_dawg_content: str,
+    static_image_path: str,
+    output_path: Optional[str] = None,
+    model: Optional[str] = None
+) -> YoDawgResponse:
+    """
+    Overlay a generated Yo Dawg meme caption on a static image.
+    :param yo_dawg_content: Content to generate the meme caption from.
+    :param static_image_path: Path to the static image file.
+    :param output_path: Path to save the new meme image (optional, auto-generated if not provided).
+    :param model: Optional model name for caption generation.
+    """
+    if not yo_dawg_content:
+        raise ActionError("No content provided for meme caption generation.")
+    if not static_image_path or not os.path.exists(static_image_path):
+        raise ActionError(f"Static image not found: {static_image_path}")
+    generator = YoDawgImageGenerator(model=model) if model else YoDawgImageGenerator()
+    yo_caption = generator.generate_yo_dawg_quote(yo_dawg_content)
+    if not yo_caption:
+        raise ActionError("Failed to generate Yo Dawg caption.")
+    if not output_path:
+        images_dir = "yo-dawg-images"
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+        output_path = os.path.join(images_dir, f"yo_dawg_static_{int(time.time())}.png")
+    generator.overlay_quote_on_static_image(yo_caption, static_image_path, output_path)
+    yo_dawg_response = YoDawgResponse(caption=yo_caption, image_filename=output_path)
+    return yo_dawg_response
+
+# ─────────────────────────────────────────
+# New action: Generate only Yo Dawg quote from content
+# ─────────────────────────────────────────
+@action
+def generate_yo_dawg_quote_only(
+    yo_dawg_content: str,
+    model: Optional[str] = None
+) -> Response:
+    """
+    Generate only the Yo Dawg meme caption from the provided content, using the specified model (if any).
+    :param yo_dawg_content: The content to transform into a Yo Dawg meme caption.
+    :param model: Optional model name to use for generation.
+    """
+    if not yo_dawg_content:
+        raise ActionError("No content provided for meme caption generation.")
+    generator = YoDawgImageGenerator(model=model) if model else YoDawgImageGenerator()
+    yo_caption = generator.generate_yo_dawg_quote(yo_dawg_content)
+    if not yo_caption:
+        raise ActionError("Failed to generate Yo Dawg caption.")
+    return Response(result=yo_caption)
+
 
 @action
-def comment_on_linkedin_post_with_image(
+def rich_mans_yo_dawg_comment(
     post_url: Optional[str] = None,
     custom_context: Optional[str] = None,
     append_custom_context: bool = False
 ) -> Response:
     """
-    Generate and post a Yo Dawg meme comment on LinkedIn using one of three modes:
+    Generate and post a Yo Dawg meme comment on LinkedIn by creating a new image.
+    Uses one of three modes:
     1. Only LinkedIn post content (provide post_url)
     2. Only custom context (provide custom_context)
     3. LinkedIn post content with appended custom context (provide both, set append_custom_context=True)
@@ -30,6 +96,49 @@ def comment_on_linkedin_post_with_image(
     :param post_url: The URL of the LinkedIn post to comment on.
     :param custom_context: Optional custom context string for meme generation.
     :param append_custom_context: If True, append custom context to LinkedIn post content.
+    """
+    return _comment_on_linkedin(
+        post_url=post_url,
+        custom_context=custom_context,
+        append_custom_context=append_custom_context,
+        use_rich_man_mode=True
+    )
+
+
+@action
+def poor_mans_yo_dawg_comment(
+    post_url: Optional[str] = None,
+    custom_context: Optional[str] = None,
+    append_custom_context: bool = False,
+) -> Response:
+    """
+    Generate and post a Yo Dawg meme comment on LinkedIn by overlaying text on a static image.
+    Uses one of three modes:
+    1. Only LinkedIn post content (provide post_url)
+    2. Only custom context (provide custom_context)
+    3. LinkedIn post content with appended custom context (provide both, set append_custom_context=True)
+    
+    :param post_url: The URL of the LinkedIn post to comment on.
+    :param custom_context: Optional custom context string for meme generation.
+    :param append_custom_context: If True, append custom context to LinkedIn post content.
+    (Uses static image path hardcoded in generator logic.)
+    """
+    return _comment_on_linkedin(
+        post_url=post_url,
+        custom_context=custom_context,
+        append_custom_context=append_custom_context,
+        use_rich_man_mode=False,
+    )
+
+
+def _comment_on_linkedin(
+    post_url: Optional[str],
+    custom_context: Optional[str],
+    append_custom_context: bool,
+    use_rich_man_mode: bool
+) -> Response:
+    """
+    Internal function to handle commenting logic for both rich and poor man's versions.
     """
     # Enforce input logic
     meme_context = None
@@ -56,8 +165,15 @@ def comment_on_linkedin_post_with_image(
     
     if not meme_context:
         raise ActionError("No context available for meme generation.")
-    # Generate meme
-    yo_dawg_response = yo_dawg_generator(meme_context)
+
+    # Generate meme based on mode
+    if use_rich_man_mode:
+        yo_dawg_response = yo_dawg_generator(meme_context)
+    else:
+        # Hardcode static image path for poor man's mode
+        static_image_path = "templates/GtGTtP_WIAAHKqP.jpg"
+        yo_dawg_response = _overlay_yo_dawg_quote_on_static_image(meme_context, static_image_path)
+    
     image_path = yo_dawg_response.image_filename
     
     signature = "\n\n---\n🎯 This content was generated by The Yo Dawg Sema4ai Action Server\n📡 Powered by Model Context Protocol (MCP)\n🤖 Autonomous meme generation system active"
@@ -153,7 +269,7 @@ def yo_dawg_generator(
 def configure_browser():
     browser.configure(
         screenshot="only-on-failure",
-        headless=True,
+        headless=False,
         persistent_context_directory=os.path.join(os.getcwd(), "browser_context"),
 
     )

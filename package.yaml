@@ -19,6 +19,7 @@ dependencies:
     - openai=1.97.0
     - robocorp-browser=2.3.5
     - pydantic=2.11.7
+    - Pillow=11.3.0
 
 
 

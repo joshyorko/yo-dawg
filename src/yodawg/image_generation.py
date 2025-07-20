@@ -1,12 +1,90 @@
 
+
 import base64
 import sys
 import os
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
+# For static image overlay
+from PIL import Image, ImageDraw, ImageFont
 
 class YoDawgImageGenerator:
+    def overlay_quote_on_static_image(self, caption, static_image_path, output_path, font_path=None):
+        """
+        Overlay the Yo Dawg meme caption (split by '|||') on a static image, using meme-style font.
+        :param caption: Meme caption, two lines separated by '|||'.
+        :param static_image_path: Path to the static image file (e.g., PNG of Xzibit).
+        :param output_path: Path to save the new meme image.
+        :param font_path: Optional path to a .ttf font file. If not provided, tries bundled font, then system fonts.
+        """
+        try:
+            top, bottom = [p.strip() for p in caption.split("|||", 1)]
+        except ValueError:
+            top, bottom = caption.strip(), ""
+        # Load image
+        img = Image.open(static_image_path).convert("RGBA")
+        draw = ImageDraw.Draw(img)
+        # Font setup
+        font = None
+        font_size = 80
+        font_candidates = []
+        font_path_used = None
+        if font_path:
+            font_candidates.append(font_path)
+        bundled_font = os.path.join(os.path.dirname(__file__), "impact.ttf")
+        if os.path.exists(bundled_font):
+            font_candidates.append(bundled_font)
+        anton_font = os.path.join(os.path.dirname(__file__), "Anton-Regular.ttf")
+        if os.path.exists(anton_font):
+            font_candidates.append(anton_font)
+        font_candidates.append("/usr/share/fonts/truetype/impact/impact.ttf")
+        font_candidates.append("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+        font_candidates.append("C:/Windows/Fonts/impact.ttf")
+        font_candidates.append("/Library/Fonts/Impact.ttf")
+        font_candidates.append("/Library/Fonts/Arial Black.ttf")
+        for candidate in font_candidates:
+            try:
+                font = ImageFont.truetype(candidate, font_size)
+                font_path_used = candidate
+                break
+            except Exception:
+                continue
+        if font is None:
+            font = ImageFont.load_default()
+            font_path_used = None
+        # Text settings
+        def draw_text(text, y, font, img, draw):
+            max_width = img.width - 40  # 20px margin on each side
+            font_size_local = font.size if hasattr(font, 'size') else 80
+            while font_size_local > 10:
+                bbox = draw.textbbox((0, 0), text, font=font)
+                w = bbox[2] - bbox[0]
+                if w <= max_width:
+                    break
+                font_size_local -= 4
+                if font_path_used:
+                    try:
+                        font = ImageFont.truetype(font_path_used, font_size_local)
+                    except Exception:
+                        font = ImageFont.load_default()
+                else:
+                    font = ImageFont.load_default()
+            x = (img.width - w) // 2
+            outline_range = 4
+            for ox in range(-outline_range, outline_range+1):
+                for oy in range(-outline_range, outline_range+1):
+                    draw.text((x+ox, y+oy), text, font=font, fill="black")
+            draw.text((x, y), text, font=font, fill="white")
+        # Top text
+        draw_text(top, 40, font, img, draw)
+        # Bottom text
+        draw_text(bottom, img.height - 140, font, img, draw)
+        img.save(output_path)
+        print(f"Static meme saved to {output_path}")
+        # ---
+        # To use a custom font, place a .ttf file (e.g., impact.ttf or Anton-Regular.ttf) in the same directory as this script,
+        # or provide the font_path argument. If no meme-style font is found, falls back to system fonts or PIL default.
     def __init__(self, model="o3-mini"):
         load_dotenv()
         self.client = OpenAI()
