@@ -1,0 +1,21 @@
+{
+    "inputs": [
+        {
+            "inputName": "input-1",
+            "inputValue": {
+                "post_url": "https://www.linkedin.com/feed/update/urn:li:share:7352769000017125377/"
+            }
+        }
+    ],
+    "metadata": {
+        "actionName": "comment_on_linkedin_post_with_image",
+        "actionRelativePath": "src/yodawg/linkedin.py",
+        "schemaDescription": [
+            "post_url: string: The URL of the LinkedIn post to comment on."
+        ],
+        "managedParamsSchemaDescription": {},
+        "inputFileVersion": "v3",
+        "kind": "action",
+        "actionSignature": "action/args: 'post_url: str'"
+    }
+}
