@@ -3,19 +3,23 @@
         {
             "inputName": "input-1",
             "inputValue": {
-                "post_url": "https://www.linkedin.com/feed/update/urn:li:share:7352769000017125377/"
+                "post_url": "",
+                "custom_context": "",
+                "append_custom_context": false
             }
         }
     ],
     "metadata": {
         "actionName": "comment_on_linkedin_post_with_image",
-        "actionRelativePath": "src/yodawg/linkedin.py",
+        "actionRelativePath": "src/yodawg/yo-dog-actions.py",
         "schemaDescription": [
-            "post_url: string: The URL of the LinkedIn post to comment on."
+            "post_url: string: The URL of the LinkedIn post to comment on.",
+            "custom_context: string: Optional custom context string for meme generation.",
+            "append_custom_context: boolean: If True, append custom context to LinkedIn post content."
         ],
         "managedParamsSchemaDescription": {},
         "inputFileVersion": "v3",
         "kind": "action",
-        "actionSignature": "action/args: 'post_url: str'"
+        "actionSignature": "action/args: 'post_url: Optional[str]=None, custom_context: Optional[str]=None, append_custom_context: bool=False'"
     }
 }
