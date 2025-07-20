@@ -74,5 +74,84 @@ action-server start
 ## License
 See `LICENSE` for details.
 
+## Using MCP and SSE Endpoints in Sema4ai Action Server
+
+### Overview
+Sema4ai Action Server exposes your Python actions as MCP tools, resources, and prompts, making them accessible to AI agents via standardized endpoints. The server automatically generates an OpenAPI spec and provides both synchronous and streaming access.
+
+### Endpoints
+- **/mcp**: Standard MCP protocol over HTTP. Synchronous requests for tool, resource, and prompt calls.
+- **/sse**: MCP protocol over Server-Sent Events. Streaming, real-time responses for agents needing live updates or long-running calls.
+
+### How to Use
+1. **Start the Action Server:**
+   ```shell
+   action-server start
+   ```
+   By default, endpoints are available at `http://localhost:8000/mcp` and `http://localhost:8000/sse`.
+
+2. **Authentication:**
+   - If started with `--api-key`, include `Authorization: Bearer <api-key>` in your requests.
+
+3. **Calling Tools, Resources, and Prompts:**
+   - **List available tools:**
+     - HTTP: `POST http://localhost:8000/mcp` with `{ "method": "tools/list" }`
+     - SSE: Connect to `http://localhost:8000/sse` and send `{ "method": "tools/list" }`
+   - **Call a tool:**
+     - HTTP: `POST http://localhost:8000/mcp` with `{ "method": "tools/call", "params": { "name": "your_tool_name", "arguments": { ... } } }`
+   - **Read a resource:**
+     - HTTP: `POST http://localhost:8000/mcp` with `{ "method": "resources/read", "params": { "uri": "resource_uri" } }`
+   - **Get a prompt:**
+     - HTTP: `POST http://localhost:8000/mcp` with `{ "method": "prompts/get", "params": { "name": "prompt_name", "arguments": { ... } } }`
+
+4. **SSE Streaming Example (Python):**
+   ```python
+   import requests
+   import sseclient
+
+   url = "http://localhost:8000/sse"
+   headers = {"Authorization": "Bearer <api-key>"}
+   response = requests.post(url, headers=headers, data='{"method": "tools/list"}', stream=True)
+   client = sseclient.SSEClient(response)
+   for event in client.events():
+       print(event.data)
+   ```
+
+### Notes
+- Tool names are now just the action name (not `<package>/<action>`).
+- Both endpoints support all MCP features: tools, resources, prompts.
+- See [Sema4ai Action Server MCP docs](https://github.com/sema4ai/actions/tree/main/action_server) and [MCP Python SDK](https://github.com/sema4ai/actions/tree/main/mcp) for more details.
+
+## Accessing MCP Actions & Endpoints
+
+### How to Reach the MCP Endpoint
+1. Start the Action Server:
+   ```shell
+   action-server start
+   ```
+   This will expose the MCP endpoint URL and a bearer token in your terminal output.
+
+2. Connect your agent or client:
+   - Use the exposed MCP endpoint URL and bearer token to authenticate requests.
+   - Most Sema4ai agents and tools support direct connection via the "Connect Action Server" workflow.
+
+3. Call Actions Remotely:
+   - Use the MCP endpoint to invoke any of the documented actions (see above) from your agent, automation, or external tool.
+   - Supported transports include HTTP and Server-Sent Events (SSE) for real-time tool access.
+
+### Example MCP Call
+```shell
+curl -X POST \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "generate_yo_dawg_quote_only", "yo_dawg_content": "Your text here"}' \
+  <your_mcp_endpoint_url>/mcp/
+```
+
+### Notes
+- MCP integration enables your AI agents to access a growing ecosystem of tools and data sources, including community and enterprise actions.
+- You can deploy the server locally or remotely, and connect agents (like Claude, GPT, etc.) to automate meme generation and posting.
+- For more details, see [Sema4ai Actions documentation](https://sema4.ai/docs/solutions/document-intelligence/get-started-with-doc-intel/test-drive-worker-agent/worker_agent_runbook_and_actions#working-with-actions).
+
 ---
 For more information, see the [Sema4ai Actions documentation](https://sema4.ai/docs/solutions/document-intelligence/get-started-with-doc-intel/test-drive-worker-agent/worker_agent_runbook_and_actions#working-with-actions).
