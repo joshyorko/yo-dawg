@@ -1,3 +1,5 @@
+from time import sleep
+
 
 from sema4ai.actions import action, Response, ActionError
 import os
@@ -27,6 +29,28 @@ LINKEDIN_PASSWORD = os.getenv("LINKEDIN_PASSWORD")
 # New action: Overlay Yo Dawg quote on a static image
 # ─────────────────────────────────────────
 
+
+@action
+def set_browser_context() -> Response:
+    """
+    Logs into LinkedIn, pauses for a specified number of seconds, and returns a Response indicating login success.
+    :param pause_seconds: Number of seconds to pause after login (default: 5).
+    """
+    configure_browser(headless_mode=False)
+    page = browser.goto("https://www.linkedin.com/login")
+    # Fill in username and password using environment variables
+    if LINKEDIN_USERNAME is None or LINKEDIN_PASSWORD is None:
+        page.close()
+        raise ActionError("LinkedIn credentials are not set in environment variables.")
+    page.get_by_role("textbox", name="Email or phone").fill(LINKEDIN_USERNAME)
+    page.get_by_role("textbox", name="Password").fill(LINKEDIN_PASSWORD)
+    page.get_by_role("button", name="Sign in", exact=True).click()
+    page.pause()
+
+
+    page.close()
+    return Response(result=f"LinkedIn login successful.")
+    
 
 def _overlay_yo_dawg_quote_on_static_image(
     yo_dawg_content: str,
@@ -266,20 +290,16 @@ def yo_dawg_generator(
 
 
 
-def configure_browser():
+def configure_browser(headless_mode: bool = True):
     browser.configure(
         screenshot="only-on-failure",
-        headless=False,
+        headless=headless_mode,
         persistent_context_directory=os.path.join(os.getcwd(), "browser_context"),
 
     )
 
 
 
-def _login(page, username, password):
-    page.get_by_role("textbox", name="Email or phone").fill(username)
-    page.get_by_role("textbox", name="Password").fill(password)
-    page.get_by_role("button", name="Sign in", exact=True).click()
 
 def _is_authenticated(page):
     # Try to find an element that only appears when logged in, e.g., the profile avatar or "Me" menu
