@@ -12,11 +12,32 @@ class YoDawgImageGenerator:
         self.client = OpenAI()
         self.model = model
 
-    def build_caption_prompt(self, content):
+    # ─────────────────────────────────────────
+    # 1. Funnier, zero‑parrot caption prompt
+    # ─────────────────────────────────────────
+    def build_caption_prompt(self, content: str) -> str:
+        """
+        Few‑shot prompt: returns TWO lines separated by `|||`.
+        The split lets the image prompt lay out classic top/bottom meme text cleanly.
+        """
         return (
-            "Create a 'Yo Dawg' meme caption based on this content.\n"
-            "Follow the classic format: 'Yo dawg, I heard you like [X], so I put [X] in your [Y] so you can [X] while you [X]!'\n"
-            f"Content: \"{content}\"\nYo Dawg Caption:"
+            "You are Xzibit, supreme master of recursive Yo‑Dawg memes.\n\n"
+            "STYLE RULES\n"
+            "• Format **exactly** two lines, separated by '|||'.\n"
+            "• Line‑1 starts with 'YO DAWG, I heard you like …'.\n"
+            "• Line‑2 delivers the recursive punchline.\n"
+            "• Do **not** copy sentences from the source. Compress it to the main concept.\n"
+            "• ≤ 100 characters per line. Hyperbole & tech jargon welcome.\n"
+            "• No hashtags, no author names, no LinkedIn references.\n\n"
+            "EXAMPLES\n"
+            "Input: Just finished migrating our CI/CD pipeline to GitHub Actions.\n"
+            "Output: YO DAWG, I heard you like pipelines|||so I put a deploy in your deploy so you ship while you ship!\n\n"
+            "Input: Deploying a Kubernetes cluster on Raspberry Pi in my homelab tonight.\n"
+            "Output: YO DAWG, I heard you like tiny clusters|||so I put a Pi in your k8s so you kube while you kube!\n\n"
+            "Input: I wrote 10k lines of Terraform to spin up infra.\n"
+            "Output: YO DAWG, I heard you like infra code|||so I put HCL in your HCL so you plan while you apply!\n\n"
+            f"NOW TRANSFORM THIS POST:\n\"{content}\"\n"
+            "Return exactly two lines separated by '|||'."
         )
 
     def get_chat_completion(self, prompt):
@@ -28,15 +49,27 @@ class YoDawgImageGenerator:
     def extract_caption_from_response(self, response):
         return response.choices[0].message.content.strip()
 
-    def build_image_prompt(self, caption):
+    # ─────────────────────────────────────────
+    # 2. Image prompt that respects the split
+    # ─────────────────────────────────────────
+    def build_image_prompt(self, caption: str) -> str:
+        """
+        Accepts the two‑line caption (joined by `|||`) and inserts
+        each half into top/bottom Impact text.
+        """
+        try:
+            top_text, bottom_text = [part.strip() for part in caption.split("|||", 1)]
+        except ValueError:
+            # Fallback if the model didn’t use the delimiter
+            top_text, bottom_text = caption.strip(), ""
         return (
-            f"Create a 'Yo Dawg' meme image with the following text overlay: '{caption}'. "
-            f"The image should show Xzibit, a smiling Black man with headphones in a high-tech control room or office setting "
-            f"with multiple computer monitors showing code/data in the background. He should be giving a thumbs up. "
-            f"The text should be in large white bold letters at the top and bottom of the image in classic meme format. "
-            f"Make sure all text is fully visible and not cut off; adjust font size and placement as needed to fit the caption within the image boundaries. "
-            f"If the caption is long, use smaller font or wrap text as needed to keep all words inside the image. "
-            f"The overall style should be modern, tech-focused, and energetic with blue/purple lighting."
+            "Generate a 'Yo Dawg' meme featuring rapper Xzibit grinning with headphones, "
+            "inside a futuristic control room glowing blue‑purple. Multiple monitors show code. "
+            "Xzibit gives a thumbs‑up toward the camera.\n\n"
+            f"TOP TEXT: '{top_text}'\n"
+            f"BOTTOM TEXT: '{bottom_text}'\n\n"
+            "Use bold white Impact font, adjust size/wrapping so all words are fully visible. "
+            "Maintain an energetic, tech‑savvy vibe."
         )
 
     def generate_image_base64(self, prompt):
