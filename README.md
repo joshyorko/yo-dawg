@@ -2,7 +2,7 @@
 
 This project is an advanced Sema4ai Action Server that automatically generates and posts custom "Yo Dawg" meme comments (with images) on LinkedIn posts using the Model Context Protocol (MCP).
 
-![Sample Yo Dawg Meme](yo-dawg-images/yo-dawg.png)
+![Sample Yo Dawg Meme](templates/GtGTtP_WIAAHKqP.jpg)
 
 ## Features
 - 🤖 Autonomous meme generation and posting
@@ -20,17 +20,44 @@ This project is an advanced Sema4ai Action Server that automatically generates a
    > 📡 Powered by Model Context Protocol (MCP)
    > 🤖 Autonomous meme generation system active
 
+## Available Actions
+
+This action server exposes several callable actions via MCP:
+
+### 1. `generate_yo_dawg_quote_only`
+Generate only the Yo Dawg meme caption from provided content.
+**Parameters:**
+- `yo_dawg_content` (str): The content to transform into a Yo Dawg meme caption.
+- `model` (str, optional): Model name to use for generation.
+**Returns:** Caption string.
+
+### 2. `rich_mans_yo_dawg_comment`
+Generate and post a Yo Dawg meme comment on LinkedIn by creating a new image.
+**Parameters:**
+- `post_url` (str, optional): The LinkedIn post URL to comment on.
+- `custom_context` (str, optional): Custom context string for meme generation.
+- `append_custom_context` (bool): If true, appends custom context to LinkedIn post content.
+**Returns:** Result message and generated image.
+
+### 3. `poor_mans_yo_dawg_comment`
+Generate and post a Yo Dawg meme comment on LinkedIn by overlaying text on a static image.
+**Parameters:**
+- `post_url` (str, optional): The LinkedIn post URL to comment on.
+- `custom_context` (str, optional): Custom context string for meme generation.
+- `append_custom_context` (bool): If true, appends custom context to LinkedIn post content.
+**Returns:** Result message and generated image.
+
+### 4. Internal Utilities
+- Meme image and caption generation (`yo_dawg_generator`, `YoDawgImageGenerator`)
+- LinkedIn post content extraction
+- Browser automation for posting comments
+
 ## Usage
-- See `src/yodawg/linkedin.py` for the main action logic.
-- The action can be triggered with a LinkedIn post URL to automatically comment with a meme.
+- See `src/yodawg/yo-dawg-actions.py` for main action logic and all callable actions.
+- Actions can be triggered via MCP endpoints or Sema4ai agent tool access.
 - Images are saved in the `yo-dawg-images/` directory.
 
 ## Requirements
-- Python 3.11+
-- Sema4ai Actions
-- Robocorp Browser
-- OpenAI API key (for meme generation)
-- **You must connect your agent (with tool access) to the `/mcp/` endpoint to enable Model Context Protocol features.**
 
 ## Example
 ```shell
@@ -38,7 +65,7 @@ action-server start
 ```
 
 ## Project Structure
-- `src/yodawg/yo-dawg-actions.py`: Main action logic
+- `src/yodawg/yo-dawg-actions.py`: Main action logic and all MCP actions
 - `src/yodawg/image_generation.py`: Meme caption and image generation
 - `src/yodawg/models.py`: Data models
 - `yo-dawg-images/`: Generated meme images
