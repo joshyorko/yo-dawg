@@ -153,7 +153,7 @@ def yo_dawg_generator(
 def configure_browser():
     browser.configure(
         screenshot="only-on-failure",
-        headless=False,
+        headless=True,
         persistent_context_directory=os.path.join(os.getcwd(), "browser_context"),
 
     )

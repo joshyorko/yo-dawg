@@ -4,7 +4,7 @@
             "inputName": "input-1",
             "inputValue": {
                 "post_url": "",
-                "custom_context": "",
+                "custom_context": "In a landscape where many RPA solutions require paid cloud services for scaling up, this project stands out by delivering orchestration for free. It shows that with a bit of ingenuity, one can replace a paid control room with existing CI/CD infrastructure and still get features like work item queues, parallel execution, and failure isolation. For DevOps and automation engineers, this approach offers a compelling alternative: use familiar tools (git, YAML pipelines, Docker, Kubernetes) to run software robots at scale, and avoid getting locked into RPA-specific platforms. Ultimately, fetch-repos-bot illustrates the art of combining RPA and DevOps to achieve scalable automation on your own terms – no proprietary control room required.",
                 "append_custom_context": false
             }
         }
