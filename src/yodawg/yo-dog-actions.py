@@ -314,7 +314,7 @@ def yo_dawg_generator(
 
 
 
-def configure_browser(headless_mode: bool = True):
+def configure_browser(headless_mode: bool = False):
     browser.configure(
         screenshot="only-on-failure",
         headless=headless_mode,
