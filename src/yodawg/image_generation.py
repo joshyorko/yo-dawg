@@ -85,7 +85,7 @@ class YoDawgImageGenerator:
         # ---
         # To use a custom font, place a .ttf file (e.g., impact.ttf or Anton-Regular.ttf) in the same directory as this script,
         # or provide the font_path argument. If no meme-style font is found, falls back to system fonts or PIL default.
-    def __init__(self, model="o3-mini"):
+    def __init__(self, model="ollama:gemma3:latest"):
         load_dotenv()
         # Support Ollama via OpenAI API compatibility
         if model and str(model).startswith("ollama:"):
