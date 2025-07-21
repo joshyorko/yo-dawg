@@ -1,0 +1,24 @@
+name: ollama
+
+services:
+  ollama:
+    image: ollama/ollama
+    deploy:
+      # resources section removed (no GPU capabilities)
+    volumes:
+      - ollama_volume:/root/.ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    networks:
+      - llm_network
+    environment:
+      - USE_GPU=${USE_GPU:-false}
+
+volumes:
+  ollama_volume:
+
+networks:
+  llm_network:
+    driver: bridge # Simple bridge network for container communication
+

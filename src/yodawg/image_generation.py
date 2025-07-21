@@ -87,8 +87,14 @@ class YoDawgImageGenerator:
         # or provide the font_path argument. If no meme-style font is found, falls back to system fonts or PIL default.
     def __init__(self, model="o3-mini"):
         load_dotenv()
-        self.client = OpenAI()
-        self.model = model
+        # Support Ollama via OpenAI API compatibility
+        if model and str(model).startswith("ollama:"):
+            # Example: model="ollama:llama2"
+            self.model = model.split(":", 1)[1]
+            self.client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+        else:
+            self.model = model
+            self.client = OpenAI()
 
     # ─────────────────────────────────────────
     # 1. Funnier, zero‑parrot caption prompt

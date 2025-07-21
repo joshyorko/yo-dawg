@@ -4,8 +4,10 @@
             "inputName": "input-1",
             "inputValue": {
                 "post_url": "",
-                "custom_context": "so a few months ago I forgot I made this kubernetes operator that orders coffee from terminal.shop, which is a coffee company that you can only order coffee through SSH. they had a competition about a month ago for the most ridiculous way to order coffee through their API and I thought well. it's kind of ridiculous to create a kubernetes operator just to make API calls, but that's what I did here it is if you want to see it. it's pretty sick.",
-                "append_custom_context": false
+                "custom_context": "",
+                "append_custom_context": false,
+                "model": "gpt-4.1-mini",
+                "image_path": "yo-dawg-images/yo_dawg_static_1753105271.png"
             }
         }
     ],
@@ -15,11 +17,13 @@
         "schemaDescription": [
             "post_url: string: The URL of the LinkedIn post to comment on.",
             "custom_context: string: Optional custom context string for meme generation.",
-            "append_custom_context: boolean: If True, append custom context to LinkedIn post content.\n(Uses static image path hardcoded in generator logic.)"
+            "append_custom_context: boolean: If True, append custom context to LinkedIn post content.",
+            "model: string: Optional model name for meme caption generation (supports OpenAI and Ollama).",
+            "image_path: string: Optional path to an existing image to post directly, bypassing meme generation.\n(Uses static image path hardcoded in generator logic.)"
         ],
         "managedParamsSchemaDescription": {},
         "inputFileVersion": "v3",
         "kind": "action",
-        "actionSignature": "action/args: 'post_url: Optional[str]=None, custom_context: Optional[str]=None, append_custom_context: bool=False'"
+        "actionSignature": "action/args: 'post_url: Optional[str]=None, custom_context: Optional[str]=None, append_custom_context: bool=False, model: Optional[str]=None, image_path: Optional[str]=None'"
     }
 }
