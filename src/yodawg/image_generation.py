@@ -18,10 +18,22 @@ class YoDawgImageGenerator:
         :param output_path: Path to save the new meme image.
         :param font_path: Optional path to a .ttf font file. If not provided, tries bundled font, then system fonts.
         """
-        try:
-            top, bottom = [p.strip() for p in caption.split("|||", 1)]
-        except ValueError:
-            top, bottom = caption.strip(), ""
+        import re
+        # Only remove <think> blocks if present
+        if '<think>' in caption:
+            cleaned_caption = re.sub(r'<think>.*?</think>', '', caption, flags=re.DOTALL)
+        else:
+            cleaned_caption = caption
+        # Remove any lines that do not start with 'YO DAWG' or are not after the split
+        if '|||' in cleaned_caption:
+            meme_lines = [p.strip() for p in cleaned_caption.split('|||', 1)]
+        else:
+            # Try to find the YO DAWG line and punchline
+            lines = [line.strip() for line in cleaned_caption.splitlines() if line.strip()]
+            top = next((l for l in lines if l.upper().startswith('YO DAWG')), lines[0] if lines else '')
+            bottom = next((l for l in lines if l != top), '')
+            meme_lines = [top, bottom]
+        top, bottom = meme_lines if len(meme_lines) == 2 else (meme_lines[0], "")
         # Load image
         img = Image.open(static_image_path).convert("RGBA")
         draw = ImageDraw.Draw(img)
@@ -57,6 +69,7 @@ class YoDawgImageGenerator:
         def draw_text(text, y, font, img, draw):
             max_width = img.width - 40  # 20px margin on each side
             font_size_local = font.size if hasattr(font, 'size') else 80
+            w = None
             while font_size_local > 10:
                 bbox = draw.textbbox((0, 0), text, font=font)
                 w = bbox[2] - bbox[0]
@@ -70,6 +83,9 @@ class YoDawgImageGenerator:
                         font = ImageFont.load_default()
                 else:
                     font = ImageFont.load_default()
+            if w is None:
+                bbox = draw.textbbox((0, 0), text, font=font)
+                w = bbox[2] - bbox[0]
             x = (img.width - w) // 2
             outline_range = 4
             for ox in range(-outline_range, outline_range+1):
@@ -91,7 +107,7 @@ class YoDawgImageGenerator:
         if model and str(model).startswith("ollama:"):
             # Example: model="ollama:llama2"
             self.model = model.split(":", 1)[1]
-            self.client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+            self.client = OpenAI(base_url="http://192.168.1.112:11434/v1", api_key="ollama")
         else:
             self.model = model
             self.client = OpenAI()
