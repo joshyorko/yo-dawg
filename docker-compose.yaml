@@ -4,9 +4,9 @@ name: yo-dawg-action-server
 #TODO need to fix the shared volume so its available on the host or have it hosted at an endpoint somehow with action-server  create a new action that maybe reads the directory and lets you view the image?
 services:
   action-server:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    #build:
+      #context: .
+     # dockerfile: Dockerfile
     image: ghcr.io/joshyorko/yo-dawg-action-server:latest
     ports:
       - "4000:8087"  # Exposes Nginx, which now routes "/" to the web UI
