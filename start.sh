@@ -3,8 +3,7 @@
 # Start Docker Compose services
 
 ## TODO workaround till i build the full compose and containerized action server
-docker compose up -d
+docker compose build
 
 
-# Start the action serverdo
-action-server start
+

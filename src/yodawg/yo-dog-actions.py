@@ -30,13 +30,14 @@ LINKEDIN_PASSWORD = os.getenv("LINKEDIN_PASSWORD")
 # ─────────────────────────────────────────
 
 
+
 @action
-def set_browser_context() -> Response:
+def set_browser_context(headless_mode: bool = True) -> Response:
     """
     Logs into LinkedIn, pauses for a specified number of seconds, and returns a Response indicating login success.
-    :param pause_seconds: Number of seconds to pause after login (default: 5).
+    :param headless_mode: Whether to run the browser in headless mode (default: True).
     """
-    configure_browser(headless_mode=False)
+    configure_browser(headless_mode=headless_mode)
     page = browser.goto("https://www.linkedin.com/login")
     # Fill in username and password using environment variables
     if LINKEDIN_USERNAME is None or LINKEDIN_PASSWORD is None:
@@ -45,8 +46,7 @@ def set_browser_context() -> Response:
     page.get_by_role("textbox", name="Email or phone").fill(LINKEDIN_USERNAME)
     page.get_by_role("textbox", name="Password").fill(LINKEDIN_PASSWORD)
     page.get_by_role("button", name="Sign in", exact=True).click()
-    page.pause()
-
+    time.sleep(5)  # Wait for login to complete
 
     page.close()
     return Response(result=f"LinkedIn login successful.")
@@ -318,7 +318,7 @@ def configure_browser(headless_mode: bool = False):
     browser.configure(
         screenshot="only-on-failure",
         headless=headless_mode,
-        persistent_context_directory=os.path.join(os.getcwd(), "browser_context"),
+        #persistent_context_directory=os.path.join(os.getcwd(), "browser_context"),
 
     )
 
