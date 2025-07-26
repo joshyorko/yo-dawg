@@ -3,7 +3,7 @@
 # Start Docker Compose services
 
 ## TODO workaround till i build the full compose and containerized action server
-docker compose build
+docker compose pull
 
 
 
