@@ -107,7 +107,7 @@ class YoDawgImageGenerator:
         if model and str(model).startswith("ollama:"):
             # Example: model="ollama:llama2"
             self.model = model.split(":", 1)[1]
-            self.client = OpenAI(base_url="http://192.168.1.112:11434/v1", api_key="ollama")
+            self.client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
         else:
             self.model = model
             self.client = OpenAI()
