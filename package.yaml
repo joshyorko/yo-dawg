@@ -21,8 +21,8 @@ dependencies:
     - pydantic=2.11.7
     - Pillow=11.3.0
 
-post-install:
-   - playwright install --with-deps chromium
+#post-install:
+#   - playwright install --with-deps chromium
 
 
 packaging:
