@@ -6,5 +6,4 @@
 docker compose up -d
 
 
-# Start the action serverdo
-action-server start
+

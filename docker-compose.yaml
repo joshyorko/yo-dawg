@@ -17,35 +17,35 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-  ollama:
-    image: ollama/ollama
-    deploy:
-      # resources section removed (no GPU capabilities)
-    volumes:
-      - ollama_volume:/root/.ollama
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
-    networks:
-      - llm_network
-    environment:
-      - USE_GPU=${USE_GPU:-false}
-
-  ollama-init:
-    image: ollama/ollama
-    entrypoint: /bin/sh
-    command:
-      - "-c"
-      - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull gemma3:latest"
-    volumes:
-      - ollama_volume:/root/.ollama
-    networks:
-      - llm_network
-    depends_on:
-      - ollama
+  #ollama:
+  #  image: ollama/ollama
+  #  deploy:
+  #    # resources section removed (no GPU capabilities)
+  #  volumes:
+  #    - ollama_volume:/root/.ollama
+  #  restart: unless-stopped
+  #  ports:
+  #    - "11434:11434"
+  #  networks:
+  #    - llm_network
+  #  environment:
+  #    - USE_GPU=${USE_GPU:-false}
+#
+  #ollama-init:
+  #  image: ollama/ollama
+  #  entrypoint: /bin/sh
+  #  command:
+  #    - "-c"
+  #    - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull gemma3:latest"
+  #  volumes:
+  #    - ollama_volume:/root/.ollama
+  #  networks:
+  #    - llm_network
+  #  depends_on:
+  #    - ollama
 
 volumes:
-  ollama_volume:
+  #ollama_volume:
   action-server-data:
   #yo-dawg-images:
 
