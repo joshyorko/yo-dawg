@@ -8,10 +8,12 @@
     "metadata": {
         "actionName": "set_browser_context",
         "actionRelativePath": "src/yodawg/yo-dog-actions.py",
-        "schemaDescription": [],
+        "schemaDescription": [
+            "headless_mode: boolean: Whether to run the browser in headless mode (default: True)."
+        ],
         "managedParamsSchemaDescription": {},
         "inputFileVersion": "v3",
         "kind": "action",
-        "actionSignature": "action/args: ''"
+        "actionSignature": "action/args: 'headless_mode: bool=False'"
     }
 }
