@@ -28,7 +28,7 @@ This action server exposes several callable actions via MCP:
 Generate only the Yo Dawg meme caption from provided content.
 **Parameters:**
 - `yo_dawg_content` (str): The content to transform into a Yo Dawg meme caption.
-- `model` (str, optional): Model name to use for generation.
+- `model` (str, required): Model name to use for generation (e.g., `gpt-4o-mini`, `ollama:phi4`).
 **Returns:** Caption string.
 
 ### 2. `rich_mans_yo_dawg_comment`
@@ -37,6 +37,7 @@ Generate and post a Yo Dawg meme comment on LinkedIn by creating a new image.
 - `post_url` (str, optional): The LinkedIn post URL to comment on.
 - `custom_context` (str, optional): Custom context string for meme generation.
 - `append_custom_context` (bool): If true, appends custom context to LinkedIn post content.
+- `model` (str, required): Model id to use for caption/image generation. No default.
 **Returns:** Result message and generated image.
 
 ### 3. `poor_mans_yo_dawg_comment`
@@ -45,6 +46,7 @@ Generate and post a Yo Dawg meme comment on LinkedIn by overlaying text on a sta
 - `post_url` (str, optional): The LinkedIn post URL to comment on.
 - `custom_context` (str, optional): Custom context string for meme generation.
 - `append_custom_context` (bool): If true, appends custom context to LinkedIn post content.
+- `model` (str, required): Model id to use for caption generation (OpenAI or `ollama:<name>`). No default.
 **Returns:** Result message and generated image.
 
 ### 4. Internal Utilities

@@ -121,13 +121,15 @@ class YoDawgImageGenerator:
         # ---
         # To use a custom font, place a .ttf file (e.g., impact.ttf or Anton-Regular.ttf) in the same directory as this script,
         # or provide the font_path argument. If no meme-style font is found, falls back to system fonts or PIL default.
-    def __init__(self, model="ollama:gemma3:latest"):
+    def __init__(self, model: str):
         load_dotenv()
+        if not model:
+            raise ValueError("Model is required; no default is set. Provide an OpenAI model id or 'ollama:<name>'.")
         # Support Ollama via OpenAI API compatibility
-        if model and str(model).startswith("ollama:"):
+        if str(model).startswith("ollama:"):
             # Example: model="ollama:llama2"
             self.model = model.split(":", 1)[1]
-            self.client = OpenAI(base_url="http://ollama:11434/v1", api_key="ollama")
+            self.client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
         else:
             self.model = model
             self.client = OpenAI()

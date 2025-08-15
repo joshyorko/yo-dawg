@@ -6,6 +6,7 @@ import os
 from .image_generation import YoDawgImageGenerator
 from .models import YoDawgResponse
 from typing import Optional
+from .signature import build_signature
 
 
 from robocorp import browser
@@ -56,20 +57,22 @@ def _overlay_yo_dawg_quote_on_static_image(
     yo_dawg_content: str,
     static_image_path: str,
     output_path: Optional[str] = None,
-    model: Optional[str] = None
+    model: str = None
 ) -> YoDawgResponse:
     """
     Overlay a generated Yo Dawg meme caption on a static image.
     :param yo_dawg_content: Content to generate the meme caption from.
     :param static_image_path: Path to the static image file.
     :param output_path: Path to save the new meme image (optional, auto-generated if not provided).
-    :param model: Optional model name for caption generation.
+    :param model: Model name for caption generation (required).
     """
     if not yo_dawg_content:
         raise ActionError("No content provided for meme caption generation.")
     if not static_image_path or not os.path.exists(static_image_path):
         raise ActionError(f"Static image not found: {static_image_path}")
-    generator = YoDawgImageGenerator(model=model) if model else YoDawgImageGenerator()
+    if not model:
+        raise ActionError("Parameter 'model' is required and must be provided.")
+    generator = YoDawgImageGenerator(model=model)
     yo_caption = generator.generate_yo_dawg_quote(yo_dawg_content)
     if not yo_caption:
         raise ActionError("Failed to generate Yo Dawg caption.")
@@ -88,16 +91,18 @@ def _overlay_yo_dawg_quote_on_static_image(
 @action
 def generate_yo_dawg_quote_only(
     yo_dawg_content: str,
-    model: Optional[str] = None
+    model: str,
 ) -> Response:
     """
-    Generate only the Yo Dawg meme caption from the provided content, using the specified model (if any).
+    Generate only the Yo Dawg meme caption from the provided content, using the specified model.
     :param yo_dawg_content: The content to transform into a Yo Dawg meme caption.
-    :param model: Optional model name to use for generation.
+    :param model: Model name to use for generation. Required.
     """
     if not yo_dawg_content:
         raise ActionError("No content provided for meme caption generation.")
-    generator = YoDawgImageGenerator(model=model) if model else YoDawgImageGenerator()
+    if not model:
+        raise ActionError("Parameter 'model' is required and must be provided.")
+    generator = YoDawgImageGenerator(model=model)
     yo_caption = generator.generate_yo_dawg_quote(yo_dawg_content)
     if not yo_caption:
         raise ActionError("Failed to generate Yo Dawg caption.")
@@ -106,9 +111,11 @@ def generate_yo_dawg_quote_only(
 
 @action
 def rich_mans_yo_dawg_comment(
+    model: str,
     post_url: Optional[str] = None,
     custom_context: Optional[str] = None,
-    append_custom_context: bool = False
+    append_custom_context: bool = False,
+    head_mode: bool = True
 ) -> Response:
     """
     Generate and post a Yo Dawg meme comment on LinkedIn by creating a new image.
@@ -120,23 +127,30 @@ def rich_mans_yo_dawg_comment(
     :param post_url: The URL of the LinkedIn post to comment on.
     :param custom_context: Optional custom context string for meme generation.
     :param append_custom_context: If True, append custom context to LinkedIn post content.
+    :param model: Model name for meme caption/image generation (required).
+    :param head_mode: Whether to run the browser in headless mode (default: True). Set to False to see the browser UI during execution.
     """
+    if not model:
+        raise ActionError("Parameter 'model' is required and must be provided.")
     return _comment_on_linkedin(
         post_url=post_url,
         custom_context=custom_context,
         append_custom_context=append_custom_context,
-        use_rich_man_mode=True
+        use_rich_man_mode=True,
+        model=model,
+        head_mode=head_mode
     )
 
 
 
 @action
 def poor_mans_yo_dawg_comment(
+    model: str,
     post_url: Optional[str] = None,
     custom_context: Optional[str] = None,
     append_custom_context: bool = False,
-    model: Optional[str] = None,
     image_path: Optional[str] = None,
+    head_mode: bool = True
 ) -> Response:
     """
     Generate and post a Yo Dawg meme comment on LinkedIn by overlaying text on a static image.
@@ -148,10 +162,13 @@ def poor_mans_yo_dawg_comment(
     :param post_url: The URL of the LinkedIn post to comment on.
     :param custom_context: Optional custom context string for meme generation.
     :param append_custom_context: If True, append custom context to LinkedIn post content.
-    :param model: Optional model name for meme caption generation (supports OpenAI and Ollama).
+    :param model: Model name for meme caption generation (supports OpenAI and Ollama). Required.
     :param image_path: Optional path to an existing image to post directly, bypassing meme generation.
     (Uses static image path hardcoded in generator logic.)
+    :param head_mode: Whether to run the browser in headless mode (default: True). Set to False to see the browser UI during execution.
     """
+    if not model:
+        raise ActionError("Parameter 'model' is required and must be provided.")
     return _comment_on_linkedin(
         post_url=post_url,
         custom_context=custom_context,
@@ -159,6 +176,7 @@ def poor_mans_yo_dawg_comment(
         use_rich_man_mode=False,
         model=model,
         image_path=image_path,
+        head_mode=head_mode
     )
 
 
@@ -169,6 +187,7 @@ def _comment_on_linkedin(
     use_rich_man_mode: bool,
     model: Optional[str] = None,
     image_path: Optional[str] = None,
+    head_mode: bool = True
 ) -> Response:
     """
     Internal function to handle commenting logic for both rich and poor man's versions.
@@ -197,7 +216,7 @@ def _comment_on_linkedin(
 
     # Browser and page handling
     if post_url:
-        configure_browser()
+        configure_browser(headless_mode=head_mode)
         page = browser.goto(post_url)
 
     # Meme generation if no image_path is provided
@@ -214,41 +233,88 @@ def _comment_on_linkedin(
 
         # Generate meme based on mode
         if use_rich_man_mode:
-            yo_dawg_response = yo_dawg_generator(meme_context)
+            if not model:
+                raise ActionError("Parameter 'model' is required for rich man mode.")
+            yo_dawg_response = yo_dawg_generator(meme_context, model)
         else:
             # Hardcode static image path for poor man's mode
             static_image_path = "templates/GtGTtP_WIAAHKqP.jpg"
+            if not model:
+                raise ActionError("Parameter 'model' is required for poor man mode.")
             yo_dawg_response = _overlay_yo_dawg_quote_on_static_image(meme_context, static_image_path, model=model)
         
         image_path = yo_dawg_response.image_filename
 
-    signature = (
-        "\n— Generated by Yo Dawg Action Server | Sema4.ai · MCP‑powered"
-    )
-    comment_text = signature
+    # Build signature (always executed, independent of image generation branch)
+    mode_str = "rich" if use_rich_man_mode else "poor"
+    comment_text = build_signature(mode=mode_str, model=model)
     
     if post_url and page:
-        # Click on the comment box
-        page.get_by_role("textbox", name="Text editor for creating").get_by_role("paragraph").click()
+        # Click on the comment box (disambiguate element to avoid strict-mode errors)
+        try:
+            editor = page.get_by_role("textbox", name="Text editor for creating").first
+            editor.click()
+        except Exception:
+            # Fallback: click the first visible contenteditable region
+            editor = page.locator("[contenteditable='true']").first
+            editor.click()
+        # Small wait to ensure the editor is ready
+        page.wait_for_timeout(300)
+
+        # Find the nearest composer container to scope subsequent actions
+        try:
+            container = editor.locator(
+                "xpath=ancestor::*[contains(@class,'comments-comment-box') or contains(@class,'comments-comment-item')]"
+            ).first
+            # Ensure it's present; if not, fallback to page
+            if container.count() == 0:
+                container = page
+        except Exception:
+            container = page
+
         # Add image if provided
         if image_path and os.path.exists(image_path):
             print(f"Uploading image: {image_path}")
             try:
                 with page.expect_file_chooser() as fc_info:
-                    page.locator("button[aria-label*='photo']").click()
+                    container.locator("button[aria-label*='Add a photo'], button[aria-label*='photo']").first.click()
                 file_chooser = fc_info.value
                 file_chooser.set_files(image_path)
-                page.wait_for_selector("img[alt*='Image preview']", timeout=10_000)
+                # Wait for a reasonable preview indicator to appear
+                page.wait_for_selector(
+                    "img[alt*='preview'], img[alt*='Image'], [data-test-media-urn], img[class*='comments-media']",
+                    timeout=15000,
+                )
                 print("Image uploaded and preview is visible.")
             except Exception as e:
                 print(f"Could not upload image: {str(e)}")
         else:
             print(f"Image not found or path empty: {image_path}")
-        # Add the comment text
-        page.get_by_role("textbox", name="Text editor for creating").fill(comment_text)
+
+        # Add the comment text (use the same disambiguated locator)
+        try:
+            page.get_by_role("textbox", name="Text editor for creating").first.fill(comment_text)
+        except Exception:
+            page.locator("[contenteditable='true']").first.fill(comment_text)
+
         # Submit the comment
         print("Submitting comment...")
-        page.locator("button[class^='comments-comment-box__submit-button']").click()
+        try:
+            # Prefer submit within the same composer container
+            submit_btn = container.locator(
+                "button.comments-comment-box__submit-button, button[class*='comments-comment-box__submit-button']"
+            ).first
+            submit_btn.wait_for(state="visible", timeout=5000)
+            submit_btn.click()
+        except Exception:
+            # Fallback to Ctrl+Enter in the editor
+            try:
+                editor.press("Control+Enter")
+            except Exception:
+                # Last resort: click any visible submit button on the page
+                page.locator(
+                    "button.comments-comment-box__submit-button, button[class*='comments-comment-box__submit-button']"
+                ).first.click()
         time.sleep(10)
         page.close()
         result_message = f"Commented on post: {post_url}"
@@ -288,6 +354,7 @@ def get_linkedin_post_content(page) -> str:
 
 def yo_dawg_generator(
     yo_dawg_content: str,
+    model: str,
 ) -> YoDawgResponse:
     """
     A 'Yo Dawg' action that generates a meme caption and image.
@@ -296,7 +363,7 @@ def yo_dawg_generator(
         if not yo_dawg_content:
             raise ActionError("No content provided for meme generation.")
 
-        generator = YoDawgImageGenerator()
+        generator = YoDawgImageGenerator(model=model)
         yo_caption = generator.generate_yo_dawg_quote(yo_dawg_content)
         if not yo_caption:
             raise ActionError("Failed to generate Yo Dawg caption.")
