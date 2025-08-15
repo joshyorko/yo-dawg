@@ -1,0 +1,19 @@
+{
+  "inputs": [
+    {
+      "id": "sema4_token",
+      "type": "promptString",
+      "description": "Bearer from `action-server start --expose`",
+      "password": false
+    }
+  ],
+  "servers": {
+    "yo-dawg-http": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${input:sema4_token}"
+      }
+    }
+  }
+}
