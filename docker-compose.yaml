@@ -1,29 +1,27 @@
-name: yo-dawg-action-server
-
-
-#TODO need to fix the shared volume so its available on the host or have it hosted at an endpoint somehow with action-server  create a new action that maybe reads the directory and lets you view the image?
 services:
   action-server:
-    #build:
-      #context: .
-     # dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: ghcr.io/joshyorko/yo-dawg-action-server:latest
     ports:
-      - "4000:8087"  # Exposes Nginx, which now routes "/" to the web UI
-     # - "443:443"  # Exposes Nginx HTTPS
+      - "4001:8087"
     volumes:
       - ./devdata:/action-server/actions/devdata
       - action-server-data:/action-server/datadir
-      - .//workspaces/yo-dawg/yo-dawg-images:/action-server/images:rw
+      - ./yo-dawg-images:/action-server/actions/yo-dawg-images:rw
     restart: unless-stopped
     env_file:
       - .env
+    networks:
+      - llm_network   # <-- Added this line
+
   ollama:
     image: ollama/ollama
     deploy:
-      # resources section removed (no GPU capabilities)
     volumes:
       - ollama_volume:/root/.ollama
+    container_name: ollama
     restart: unless-stopped
     ports:
       - "11434:11434"
@@ -48,9 +46,7 @@ services:
 volumes:
   ollama_volume:
   action-server-data:
-  #yo-dawg-images:
 
 networks:
   llm_network:
-    driver: bridge # Simple bridge network for container communication
-
+    driver: bridge

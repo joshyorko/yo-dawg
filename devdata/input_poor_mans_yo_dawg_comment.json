@@ -4,9 +4,9 @@
             "inputName": "input-1",
             "inputValue": {
                 "post_url": "",
-                "custom_context": "",
+                "custom_context": "Without a labeled y-axis, units, source, or context, this chart is meaningless. It’s like walking into the middle of a movie with no idea who the characters are or what’s going on—you’re left guessing instead of learning anything.",
                 "append_custom_context": false,
-                "model": "gpt-4.1-mini",
+                "model": "ollama:gemma3:1b",
                 "image_path": ""
             }
         }

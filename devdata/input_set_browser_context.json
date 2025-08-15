@@ -2,7 +2,9 @@
     "inputs": [
         {
             "inputName": "input-1",
-            "inputValue": {}
+            "inputValue": {
+                "headless_mode": false
+            }
         }
     ],
     "metadata": {
@@ -14,6 +16,6 @@
         "managedParamsSchemaDescription": {},
         "inputFileVersion": "v3",
         "kind": "action",
-        "actionSignature": "action/args: 'headless_mode: bool=False'"
+        "actionSignature": "action/args: 'headless_mode: bool=True'"
     }
 }

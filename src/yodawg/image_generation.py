@@ -37,24 +37,44 @@ class YoDawgImageGenerator:
         # Load image
         img = Image.open(static_image_path).convert("RGBA")
         draw = ImageDraw.Draw(img)
-        # Font setup
+        # Font setup - cloud-native font fallback chain
         font = None
         font_size = 80
         font_candidates = []
         font_path_used = None
         if font_path:
             font_candidates.append(font_path)
+        
+        # Bundled fonts (local development)
         bundled_font = os.path.join(os.path.dirname(__file__), "impact.ttf")
         if os.path.exists(bundled_font):
             font_candidates.append(bundled_font)
         anton_font = os.path.join(os.path.dirname(__file__), "Anton-Regular.ttf")
         if os.path.exists(anton_font):
             font_candidates.append(anton_font)
+        
+        # Container fonts (cloud-native - downloaded in Dockerfile)
+        font_candidates.append("/usr/share/fonts/truetype/meme-fonts/impact.ttf")
+        font_candidates.append("/usr/share/fonts/truetype/meme-fonts/Anton-Regular.ttf")
+        font_candidates.append("/usr/share/fonts/truetype/meme-fonts/Oswald-Bold.ttf")
+        
+        # Backwards compatibility - check fonts directory
+        container_anton_font = "/action-server/actions/fonts/Anton-Regular.ttf"
+        if os.path.exists(container_anton_font):
+            font_candidates.append(container_anton_font)
+        container_impact_font = "/action-server/actions/fonts/impact.ttf"
+        if os.path.exists(container_impact_font):
+            font_candidates.append(container_impact_font)
+        container_oswald_font = "/action-server/actions/fonts/Oswald-Bold.ttf"
+        if os.path.exists(container_oswald_font):
+            font_candidates.append(container_oswald_font)
+        
+        # System fonts fallback
         font_candidates.append("/usr/share/fonts/truetype/impact/impact.ttf")
         font_candidates.append("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
-        font_candidates.append("C:/Windows/Fonts/impact.ttf")
-        font_candidates.append("/Library/Fonts/Impact.ttf")
-        font_candidates.append("/Library/Fonts/Arial Black.ttf")
+        font_candidates.append("C:/Windows/Fonts/impact.ttf")  # Windows
+        font_candidates.append("/Library/Fonts/Impact.ttf")     # macOS
+        font_candidates.append("/Library/Fonts/Arial Black.ttf") # macOS
         for candidate in font_candidates:
             try:
                 font = ImageFont.truetype(candidate, font_size)

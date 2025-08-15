@@ -1,4 +1,8 @@
 {
-    "image": "ghcr.io/joshyorko/ror:latest"
-
+    "image": "ghcr.io/joshyorko/ror:latest",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "upgradePackages": "true"
+        }
+    }
 }
