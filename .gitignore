@@ -6,7 +6,7 @@
 .pydevproject
 .use
 .venv/
-
+.vscode
 metadata.json
 output/
 temp/
