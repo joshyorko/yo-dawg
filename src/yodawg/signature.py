@@ -63,11 +63,11 @@ def build_signature(mode: Optional[str] = None, model: Optional[str] = None) -> 
     hashtags = os.getenv("SIGNATURE_HASHTAGS") or ""
     prefix_nl = _bool_env("SIGNATURE_PREFIX_NEWLINE", True)
     max_len = int(os.getenv("SIGNATURE_MAX_LENGTH") or 280)
-    include_sema4 = _bool_env("SIGNATURE_INCLUDE_SEMA4", True)
-    sema4_label = os.getenv("SIGNATURE_SEMA4_LABEL") or "Sema4.ai"
+    #include_sema4 = _bool_env("SIGNATURE_INCLUDE_SEMA4", True)
+    #sema4_label = os.getenv("SIGNATURE_SEMA4_LABEL")
 
     emoji_brand = "🐶"
-    model = model.split("ollama:", 1)[1].strip()
+    #model = model.split("ollama:", 1)[1].strip()
     emoji_model = _pick_model_emoji(model)
 
     # Default templates per style (used only if SIGNATURE_TEMPLATE not set)
@@ -100,10 +100,7 @@ def build_signature(mode: Optional[str] = None, model: Optional[str] = None) -> 
 
     parts = [core]
     # Ensure Sema4.ai is present at least once if requested
-    if include_sema4:
-        core_lc = core.lower()
-        if "sema4.ai" not in core_lc and sema4_label.lower() not in core_lc:
-            parts.append(sema4_label)
+    
     if url:
         parts.append(url.strip())
     if hashtags:
